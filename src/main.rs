@@ -9,8 +9,8 @@ mod objects;
 const WIDTH: usize = 800;
 const HEIGHT: usize = 600;
 const FOV: f32 = 90.0 * f32::consts::PI / 180.0; // 90 degrees
-const SAMPLES_PER_PIXEL: usize = 2;
-const MAX_BOUNCES: usize = 100;
+const SAMPLES_PER_PIXEL: usize = 2000;
+const MAX_BOUNCES: usize = 200;
 fn main() {
     let mut image = png_manager::Image::new(WIDTH as u32, HEIGHT as u32);
     let scene = scene_manager::Scene::new("scenes/scene_1.json".to_string());
