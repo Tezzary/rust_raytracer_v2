@@ -18,10 +18,10 @@ fn main() {
             let x_angle = ((x as f32 + 0.5) / WIDTH as f32 - 0.5) * FOV;
             let y_angle = ((y as f32 + 0.5) / HEIGHT as f32 - 0.5) * FOV * HEIGHT as f32 / WIDTH as f32;
             let dir_x = x_angle.sin();
-            let dir_y = y_angle.sin();
+            let dir_y = -y_angle.sin();
             let length = (dir_x.powi(2) + dir_y.powi(2) + 1.0).sqrt();
-            let ray = objects::Ray::new([0.0, 0.0, -100.0], [dir_x / length, dir_y / length, 1.0 / length]);
-            let color = scene.trace(&ray);
+            let mut ray = objects::Ray::new([0.0, 0.0, -100.0], [dir_x / length, dir_y / length, 1.0 / length]);
+            let color = scene.trace(&mut ray, 1, 1);
             image.set_pixel(x as u32, y as u32, [color[0], color[1], color[2], 255]);
         }
     }
