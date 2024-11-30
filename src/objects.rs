@@ -16,7 +16,9 @@ impl Sphere {
         let b = 2.0 * (ray.direction[0] * (ray.origin[0] - self.center[0]) +
                        ray.direction[1] * (ray.origin[1] - self.center[1]) +
                        ray.direction[2] * (ray.origin[2] - self.center[2]));
-        let c = ray.origin[0].powi(2) + ray.origin[1].powi(2) + ray.origin[2].powi(2) - self.radius.powi(2);
+        let c = (ray.origin[0] - self.center[0]).powi(2) +
+                (ray.origin[1] - self.center[1]).powi(2) +
+                (ray.origin[2] - self.center[2]).powi(2) - self.radius.powi(2);
         let discriminant = b.powi(2) - 4.0 * a * c;
         if discriminant < 0.0 {
             return -1.0;

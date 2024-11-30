@@ -26,13 +26,20 @@ impl Scene {
             ];
             scene.spheres.push(Sphere::new(center, radius, color));
         }
+        println!("{}", scene.spheres[0].center[0]);
+        println!("{}", scene.spheres[0].center[1]);
+        println!("{}", scene.spheres[0].center[2]);
+        println!("{}", scene.spheres[0].radius);
+        println!("{}", scene.spheres[0].color[0]);
+        println!("{}", scene.spheres[0].color[1]);
+        println!("{}", scene.spheres[0].color[2]);
         scene
     }
     pub fn trace(&self, ray: &Ray) -> [u8; 3] {
         let mut min_t = f32::INFINITY;
         let mut color = [0, 0, 0];
         for sphere in &self.spheres {
-            println!("speher");
+            //println!("speher");
             let t = sphere.intersection(ray);
             if t > 0.0 && t < min_t {
                 min_t = t;
