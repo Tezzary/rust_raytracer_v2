@@ -1,8 +1,9 @@
 {
     "spheres": [
         {
-            "position": [0, 0, -100],
-            "radius": 10
+            "center": [0, 0, -100],
+            "radius": 30,
+            "color": [1, 0, 0]
         }
     ]
 }
