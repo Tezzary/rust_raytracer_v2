@@ -4,11 +4,11 @@
             "center": [0, 0, 0],
             "radius": 30,
             "color": [1, 0, 0],
-            "light": 1
+            "light": 0
         },
         {
-            "center": [0, 20, -50],
-            "radius": 10,
+            "center": [100, 20, -50],
+            "radius": 50,
             "color": [1, 1, 1],
             "light": 1
         }
