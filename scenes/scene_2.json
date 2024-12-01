@@ -11,6 +11,12 @@
             "radius": 25,
             "color": [1, 1, 1],
             "light": 1
+        },
+        {
+            "center": [-50, 10, -25],
+            "radius": 25,
+            "color": [1, 1, 1],
+            "light": 1
         }
     ]
 }

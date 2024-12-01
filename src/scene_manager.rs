@@ -2,6 +2,7 @@ use std::fs::File;
 use serde_json::{Result, Value};
 use super::objects::{Sphere, Ray, Hit};
 use rand::prelude::*;
+#[derive(Clone)]
 pub struct Scene {
     pub spheres: Vec<Sphere>,
 }
@@ -65,7 +66,7 @@ impl Scene {
                 for sphere in &self.spheres {
                     //println!("speher");
                     let hit = sphere.intersection(ray);
-                    if hit.t > 0.0 && hit.t < closest_hit.t {
+                    if hit.t != -1.0 && hit.t < closest_hit.t {
                         closest_hit = hit;
                     }
                 }

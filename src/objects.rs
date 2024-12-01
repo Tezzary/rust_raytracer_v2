@@ -20,6 +20,7 @@ impl Hit {
 
 }
 
+#[derive(Clone)]
 pub struct Sphere {
     pub center: [f32; 3],
     pub radius: f32,
@@ -48,12 +49,17 @@ impl Sphere {
             return Hit::new(-1.0, [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], 0.0);
         }
         let t = (-b - discriminant.sqrt()) / (2.0 * a);
-        if t < 0.0001 {
+        if t < 0.0 {
             return Hit::new(-1.0, [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], 0.0);
         }
-        let location = [ray.origin[0] + ray.direction[0] * t,
+        let mut location = [ray.origin[0] + ray.direction[0] * t,
                         ray.origin[1] + ray.direction[1] * t,
                         ray.origin[2] + ray.direction[2] * t];
+        let location = [location[0] - self.center[0], location[1] - self.center[1], location[2] - self.center[2]];
+        let length = (location[0].powi(2) + location[1].powi(2) + location[2].powi(2)).sqrt();
+        let location = [location[0] / length * self.radius * 1.01 + self.center[0],
+                        location[1] / length * self.radius * 1.00001 + self.center[1],
+                        location[2] / length * self.radius * 1.00001 + self.center[2]];
         let normal = [(location[0] - self.center[0]) / self.radius,
                         (location[1] - self.center[1]) / self.radius,
                         (location[2] - self.center[2]) / self.radius];

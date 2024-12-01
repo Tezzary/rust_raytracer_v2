@@ -1,7 +1,7 @@
 use std::fs::File;
 use png;
 
-fn create_unused_filename() -> String {
+pub fn create_unused_filename() -> String {
     let mut i = 0;
     loop {
         let filename = format!("images/output_{}.png", i);
@@ -45,6 +45,9 @@ impl Image {
             self.data[index * 4 + 2],
             self.data[index * 4 + 3],
         ]
+    }
+    pub fn update_filename(&mut self, filename: String) {
+        self.filename = filename;
     }
     pub fn save_image(&self) {
         let file = File::create(&self.filename).unwrap();
