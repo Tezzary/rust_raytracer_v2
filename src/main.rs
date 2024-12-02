@@ -11,15 +11,15 @@ mod objects;
 
 const LOGGING: bool = false;
 
-const WIDTH: usize = 1600;
-const HEIGHT: usize = 1200;
+const WIDTH: usize = 400;
+const HEIGHT: usize = 300;
 const FOV: f32 = 90.0 * f32::consts::PI / 180.0; // 90 degrees
-const SAMPLES_PER_PIXEL: usize = 5;
+const SAMPLES_PER_PIXEL: usize = 50000;
 const MAX_BOUNCES: usize = 20;
 const ANTI_ALIASING: bool = true;
 const SCENE_FILE: &str = "scenes/scene_0_wallless.json";
 
-const THREAD_COUNT: usize = 20;
+const THREAD_COUNT: usize = 24;
 const THREAD_CHUNK_SIZE: usize = 20;
 
 fn status_print(saved_chunks: usize, total_chunks: usize, elapsed_time: u64) {
