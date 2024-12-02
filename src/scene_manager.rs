@@ -47,17 +47,46 @@ impl Scene {
         */
         scene
     }
-    pub fn trace(&self, ray: &mut Ray, bounces: usize, samples: usize) -> [u8; 3] {
+    pub fn trace(&self, x:usize, y:usize, bounces: usize, samples: usize, antialiasing: bool, width: usize, height: usize, fov: f32) -> [u8; 3] {
+        let mut rng = rand::thread_rng();
+        let mut antialiasing_x: f32 = 0.0;
+        let mut antialiasing_y: f32 = 0.0;
+
+        if antialiasing {
+            antialiasing_x = rng.gen::<f32>() - 0.5;
+            antialiasing_y = rng.gen::<f32>() - 0.5;
+        }
+
+        let x_angle = ((x as f32 + antialiasing_x + 0.5) / width as f32 - 0.5) * fov;
+        let y_angle = ((y as f32 + antialiasing_y + 0.5) / height as f32 - 0.5) * fov * height as f32 / width as f32;
+
+        let dir_x = x_angle.sin();
+        let dir_y = -y_angle.sin();
+        
+        let length = (dir_x.powi(2) + dir_y.powi(2) + 1.0).sqrt();
+        let mut ray = Ray::new([0.0, 0.0, -50.0], [dir_x / length, dir_y / length, 1.0 / length]);
+
         let mut colour_sum = [0.0, 0.0, 0.0];
         let initial_origin = [ray.origin[0], ray.origin[1], ray.origin[2]];
-        let initial_direction = [ray.direction[0], ray.direction[1], ray.direction[2]];
 
-        let mut rng = rand::thread_rng();
+        
 
         for _ in 0..samples {
 
             ray.origin = [initial_origin[0], initial_origin[1], initial_origin[2]];
-            ray.direction = [initial_direction[0], initial_direction[1], initial_direction[2]];
+
+            if antialiasing {
+                antialiasing_x = rng.gen::<f32>() - 0.5;
+                antialiasing_y = rng.gen::<f32>() - 0.5;
+            }
+    
+            let x_angle = ((x as f32 + antialiasing_x + 0.5) / width as f32 - 0.5) * fov;
+            let y_angle = ((y as f32 + antialiasing_y + 0.5) / height as f32 - 0.5) * fov * height as f32 / width as f32;
+    
+            let dir_x = x_angle.sin();
+            let dir_y = -y_angle.sin();
+            ray.direction = [dir_x / length, dir_y / length, 1.0 / length];
+            
             ray.color = [1.0, 1.0, 1.0];
             ray.light = 0.0;
             let mut commited_color = [0.0, 0.0, 0.0];
@@ -65,7 +94,7 @@ impl Scene {
                 let mut closest_hit = Hit::new(f32::INFINITY, [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], 0.0);
                 for sphere in &self.spheres {
                     //println!("speher");
-                    let hit = sphere.intersection(ray);
+                    let hit = sphere.intersection(&ray);
                     if hit.t != -1.0 && hit.t < closest_hit.t {
                         closest_hit = hit;
                     }
