@@ -2,6 +2,9 @@ use std::fs::File;
 use serde_json::{Result, Value};
 use super::objects::{Sphere, Ray, Hit};
 use rand::prelude::*;
+
+use super::objmanager;
+
 #[derive(Clone)]
 pub struct Scene {
     pub spheres: Vec<Sphere>,

@@ -5,9 +5,11 @@ use std::sync::mpsc;
 use std::io::Write;
 use png;
 use std::time;
+
 mod scene_manager;
 mod png_manager;
 mod objects;
+mod objmanager;
 
 const LOGGING: bool = false;
 
