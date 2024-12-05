@@ -13,13 +13,13 @@ mod objmanager;
 
 const LOGGING: bool = false;
 
-const WIDTH: usize = 400;
-const HEIGHT: usize = 300;
+const WIDTH: usize = 800;
+const HEIGHT: usize = 600;
 const FOV: f32 = 90.0 * f32::consts::PI / 180.0; // 90 degrees
-const SAMPLES_PER_PIXEL: usize = 50000;
-const MAX_BOUNCES: usize = 20;
+const SAMPLES_PER_PIXEL: usize = 10000;
+const MAX_BOUNCES: usize = 5;
 const ANTI_ALIASING: bool = true;
-const SCENE_FILE: &str = "scenes/scene_0_wallless.json";
+const SCENE_FILE: &str = "scenes/objs_scene.json";
 
 const THREAD_COUNT: usize = 24;
 const THREAD_CHUNK_SIZE: usize = 20;
@@ -29,6 +29,9 @@ fn status_print(saved_chunks: usize, total_chunks: usize, elapsed_time: u64) {
     std::io::stdout().flush().unwrap();
 }
 fn main() {
+    //take in --scene argument
+    //let scene_file = std::env::args()
+
     if WIDTH % THREAD_CHUNK_SIZE != 0 || HEIGHT % THREAD_CHUNK_SIZE != 0 {
         panic!("Width and height must be divisible by thread chunk size");
     }

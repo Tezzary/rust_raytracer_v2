@@ -49,7 +49,7 @@ impl Sphere {
             return Hit::new(-1.0, [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], 0.0);
         }
         let t = (-b - discriminant.sqrt()) / (2.0 * a);
-        if t < 0.0 {
+        if t < 0.00001 {
             return Hit::new(-1.0, [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], 0.0);
         }
         let mut location = [ray.origin[0] + ray.direction[0] * t,
@@ -57,9 +57,9 @@ impl Sphere {
                         ray.origin[2] + ray.direction[2] * t];
         let location = [location[0] - self.center[0], location[1] - self.center[1], location[2] - self.center[2]];
         let length = (location[0].powi(2) + location[1].powi(2) + location[2].powi(2)).sqrt();
-        let location = [location[0] / length * self.radius * 1.01 + self.center[0],
-                        location[1] / length * self.radius * 1.00001 + self.center[1],
-                        location[2] / length * self.radius * 1.00001 + self.center[2]];
+        let location = [location[0] / length * self.radius + self.center[0],
+                        location[1] / length * self.radius + self.center[1],
+                        location[2] / length * self.radius + self.center[2]];
         let normal = [(location[0] - self.center[0]) / self.radius,
                         (location[1] - self.center[1]) / self.radius,
                         (location[2] - self.center[2]) / self.radius];
@@ -68,11 +68,26 @@ impl Sphere {
     }
 }
 
+#[derive(Clone)]
 pub struct Triangle {
     pub vertices: [[f32; 3]; 3],
     pub normal: [f32; 3],
     pub color: [f32; 3],
     pub light: f32,
+}
+fn cross_product(a: [f32; 3], b: [f32; 3]) -> [f32; 3] {
+    [a[1] * b[2] - a[2] * b[1],
+     a[2] * b[0] - a[0] * b[2],
+     a[0] * b[1] - a[1] * b[0]]
+}
+fn dot_product(a: [f32; 3], b: [f32; 3]) -> f32 {
+    a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
+}
+fn add(a: [f32; 3], b: [f32; 3]) -> [f32; 3] {
+    [a[0] + b[0], a[1] + b[1], a[2] + b[2]]
+}
+fn subtract(a: [f32; 3], b: [f32; 3]) -> [f32; 3] {
+    [a[0] - b[0], a[1] - b[1], a[2] - b[2]]
 }
 impl Triangle {
     pub fn new(vertices: [[f32; 3]; 3], color: [f32; 3], light: f32) -> Triangle {
@@ -89,37 +104,46 @@ impl Triangle {
         }
     }
     pub fn intersection(&self, ray: &Ray) -> Hit {
-        let edge1 = [self.vertices[1][0] - self.vertices[0][0], self.vertices[1][1] - self.vertices[0][1], self.vertices[1][2] - self.vertices[0][2]];
-        let edge2 = [self.vertices[2][0] - self.vertices[0][0], self.vertices[2][1] - self.vertices[0][1], self.vertices[2][2] - self.vertices[0][2]];
-        let h = [ray.direction[1] * edge2[2] - ray.direction[2] * edge2[1],
-                ray.direction[2] * edge2[0] - ray.direction[0] * edge2[2],
-                ray.direction[0] * edge2[1] - ray.direction[1] * edge2[0]];
-        let a = edge1[0] * h[0] + edge1[1] * h[1] + edge1[2] * h[2];
-        if a > -0.00001 && a < 0.00001 {
-            return Hit::new(-1.0, [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], 0.0);
-        }
-        let f = 1.0 / a;
-        let s = [ray.origin[0] - self.vertices[0][0], ray.origin[1] - self.vertices[0][1], ray.origin[2] - self.vertices[0][2]];
-        let u = f * (s[0] * h[0] + s[1] * h[1] + s[2] * h[2]);
-        if u < 0.0 || u > 1.0 {
-            return Hit::new(-1.0, [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], 0.0);
-        }
-        let q = [s[1] * edge1[2] - s[2] * edge1[1], s[2] * edge1[0] - s[0] * edge1[2], s[0] * edge1[1] - s[1] * edge1[0]];
-        let v = f * (ray.direction[0] * q[0] + ray.direction[1] * q[1] + ray.direction[2] * q[2]);
-        if v < 0.0 || u + v > 1.0 {
-            return Hit::new(-1.0, [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], 0.0);
-        }
-        let t = f * (edge2[0] * q[0] + edge2[1] * q[1] + edge2[2] * q[2]);
-        if t < 0.0 {
-            return Hit::new(-1.0, [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], 0.0);
-        }
-        let location = [ray.origin[0] + ray.direction[0] * t,
-                        ray.origin[1] + ray.direction[1] * t,
-                        ray.origin[2] + ray.direction[2] * t];
-        Hit::new(t, location, self.normal, self.color, self.light)
-    }
 
-pub struct PolygonalObject {
+        //converted math into rust
+        //https://diegoinacio.github.io/computer-vision-notebooks-page/pages/ray-intersection_triangle.html 
+        
+        //let vertex 0 = a, vertex 1 = b, vertex 2 = c
+        let ab = subtract(self.vertices[1], self.vertices[0]); //vertices[1] - vertices[0]
+        let ca = subtract(self.vertices[0], self.vertices[2]); //vertices[0] - vertices[2]
+        let bc = subtract(self.vertices[2], self.vertices[1]); //vertices[2] - vertices[1]
+        
+        let d = -dot_product(self.normal, self.vertices[0]);
+        let normal_dot_dir = dot_product(self.normal, ray.direction);
+
+        if normal_dot_dir.abs() < 0.00001 { //parrallel check
+            return Hit::new(-1.0, [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], 0.0);
+        }
+
+        let normal_dot_origin = dot_product(self.normal, ray.origin);
+        let t = -(normal_dot_origin + d) / normal_dot_dir;
+        if t < 0.00001 {
+            return Hit::new(-1.0, [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], 0.0);
+        }
+        let p = [ray.origin[0] + ray.direction[0] * t,
+                 ray.origin[1] + ray.direction[1] * t,
+                 ray.origin[2] + ray.direction[2] * t];
+        let pa = dot_product(cross_product(ab, subtract(p, self.vertices[0])), self.normal);
+        let pb = dot_product(cross_product(bc, subtract(p, self.vertices[1])), self.normal);
+        let pc = dot_product(cross_product(ca, subtract(p, self.vertices[2])), self.normal);
+
+        if pa >= 0.0 && pb >= 0.0 && pc >= 0.0 {
+            if dot_product(ray.direction, self.normal) > 0.0 {
+                return Hit::new(t, p, [-self.normal[0], -self.normal[1], -self.normal[2]], self.color, self.light);
+            }
+            return Hit::new(t, p, self.normal, self.color, self.light);
+        }
+        Hit::new(-1.0, [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], 0.0)
+    }
+}
+
+/*
+pub struct TriangleObject {
     pub triangles: Vec<Triangle>,
     pub color: [f32; 3],
     pub light: f32,
@@ -131,8 +155,8 @@ pub struct PolygonalObject {
     pub avg: [f32; 3],
 
 }
-impl PolygonalObject {
-    pub fn new(triangles: Vec<Triangle>, color: [f32; 3], light: f32) -> PolygonalObject {
+impl TriangleObject {
+    pub fn new(triangles: Vec<Triangle>, color: [f32; 3], light: f32) -> TriangleObject {
         let mut max = [0.0, 0.0, 0.0];
         let mut min = [0.0, 0.0, 0.0];
         
@@ -160,7 +184,7 @@ impl PolygonalObject {
         }
     }
 }
-}
+*/
 pub struct Ray {
     pub origin: [f32; 3],
     pub direction: [f32; 3],

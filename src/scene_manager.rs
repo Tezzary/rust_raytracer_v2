@@ -1,6 +1,6 @@
 use std::fs::File;
 use serde_json::{Result, Value};
-use super::objects::{Sphere, Ray, Hit};
+use super::objects::{Sphere, Ray, Hit, Triangle};
 use rand::prelude::*;
 
 use super::objmanager;
@@ -8,6 +8,7 @@ use super::objmanager;
 #[derive(Clone)]
 pub struct Scene {
     pub spheres: Vec<Sphere>,
+    pub triangles: Vec<Triangle>,
 }
 //sd 1, mean 0
 fn gaussian_random(rng: &mut ThreadRng) -> f32 {
@@ -21,6 +22,7 @@ impl Scene {
     pub fn new(scene_name: String) -> Scene {
         let mut scene = Scene {
             spheres: Vec::new(),
+            triangles: Vec::new(),
         };
         let file = File::open(scene_name).expect("File not found");
         let data: Value = serde_json::from_reader(file).expect("Error while reading file");
@@ -38,6 +40,29 @@ impl Scene {
             ];
             let light = sphere["light"].as_f64().unwrap() as f32;
             scene.spheres.push(Sphere::new(center, radius, color, light));
+        }
+        for obj in data["objects"].as_array().unwrap() {
+            let filename = obj["filename"].as_str().unwrap();
+            let light = obj["light"].as_f64().unwrap() as f32;
+            let color = [
+                obj["color"][0].as_f64().unwrap() as f32,
+                obj["color"][1].as_f64().unwrap() as f32,
+                obj["color"][2].as_f64().unwrap() as f32,
+            ];
+            let translation = [
+                obj["position"][0].as_f64().unwrap() as f32,
+                obj["position"][1].as_f64().unwrap() as f32,
+                obj["position"][2].as_f64().unwrap() as f32,
+            ];
+            let scale = [
+                obj["scale"][0].as_f64().unwrap() as f32,
+                obj["scale"][1].as_f64().unwrap() as f32,
+                obj["scale"][2].as_f64().unwrap() as f32,
+            ];
+            let triangles = objmanager::extract_triangles(filename, translation, scale, light, color);
+            for triangle in triangles {
+                scene.triangles.push(triangle);
+            }
         }
         /* 
         println!("{}", scene.spheres[0].center[0]);
@@ -91,8 +116,8 @@ impl Scene {
             ray.direction = [dir_x / length, dir_y / length, 1.0 / length];
             
             ray.color = [1.0, 1.0, 1.0];
-            ray.light = 0.0;
-            let mut commited_color = [0.0, 0.0, 0.0];
+            let mut accumulated_light = [0.0, 0.0, 0.0];
+
             for _ in 0..bounces {
                 let mut closest_hit = Hit::new(f32::INFINITY, [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], 0.0);
                 for sphere in &self.spheres {
@@ -102,19 +127,27 @@ impl Scene {
                         closest_hit = hit;
                     }
                 }
+                for triangle in &self.triangles {
+                    //println!("triangle");
+                    let hit = triangle.intersection(&ray);
+                    if hit.t != -1.0 && hit.t < closest_hit.t {
+                        closest_hit = hit;
+                    }
+                }
+
                 if closest_hit.t == f32::INFINITY {
                     break;
                 }
-
-                ray.light = closest_hit.light;
-
-                commited_color[0] += ray.color[0] * ray.light;
-                commited_color[1] += ray.color[1] * ray.light;
-                commited_color[2] += ray.color[2] * ray.light;
+                let light_emitted = [closest_hit.color[0] * closest_hit.light, closest_hit.color[1] * closest_hit.light, closest_hit.color[2] * closest_hit.light];
+                accumulated_light = [accumulated_light[0] + light_emitted[0] * ray.color[0], accumulated_light[1] + light_emitted[1] * ray.color[1], accumulated_light[2] + light_emitted[2] * ray.color[2]];
 
                 ray.color[0] *= closest_hit.color[0] as f32;
                 ray.color[1] *= closest_hit.color[1] as f32;
                 ray.color[2] *= closest_hit.color[2] as f32;
+
+                if closest_hit.light > 0.0 {
+                    break;
+                }
 
                 ray.origin = closest_hit.location;
                 
@@ -144,9 +177,9 @@ impl Scene {
                     ray.direction[2] = -ray.direction[2];
                 }
             }
-            colour_sum[0] += commited_color[0];
-            colour_sum[1] += commited_color[1];
-            colour_sum[2] += commited_color[2];
+            colour_sum[0] += accumulated_light[0];
+            colour_sum[1] += accumulated_light[1];
+            colour_sum[2] += accumulated_light[2];
         }
         [
             (colour_sum[0] * 255.0 / samples as f32) as u8,

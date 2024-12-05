@@ -1,0 +1,60 @@
+{
+    "spheres": [
+        {
+            "center": [-36, 0, 0],
+            "radius": 8,
+            "color": [1, 0, 0],
+            "light": 0
+        },
+        {
+            "center": [-18, 0, 0],
+            "radius": 8,
+            "color": [1, 0, 1],
+            "light": 0
+        },
+
+
+
+        {
+            "center": [18, 0, 0],
+            "radius": 8,
+            "color": [0, 1, 1],
+            "light": 0
+        },
+        {
+            "center": [36, 0, 0],
+            "radius": 8,
+            "color": [0, 1, 0],
+            "light": 0
+        },
+
+        {
+            "center": [0, -1008, 0],
+            "radius": 1000,
+            "color": [0.3, 0.3, 0.3],
+            "light": 0
+        },
+
+        {
+            "center": [30, 0, 100],
+            "radius": 50,
+            "color": [1, 1, 1],
+            "light": 20
+        },
+        {
+            "center": [25, 20, -20],
+            "radius": 5,
+            "color": [1, 1, 1],
+            "light": 20
+        }
+    ],
+    "objects": [
+        {
+            "filename": "objs/polyball.obj",
+            "position": [0, 0, 0],
+            "scale": [8, 8, 8],
+            "color": [1, 1, 1],
+            "light": 0
+        }
+    ]
+}
