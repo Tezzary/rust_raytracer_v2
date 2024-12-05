@@ -16,8 +16,8 @@ const LOGGING: bool = false;
 const WIDTH: usize = 800;
 const HEIGHT: usize = 600;
 const FOV: f32 = 90.0 * f32::consts::PI / 180.0; // 90 degrees
-const SAMPLES_PER_PIXEL: usize = 10000;
-const MAX_BOUNCES: usize = 5;
+const SAMPLES_PER_PIXEL: usize = 1000;
+const MAX_BOUNCES: usize = 3;
 const ANTI_ALIASING: bool = true;
 const SCENE_FILE: &str = "scenes/objs_scene.json";
 
