@@ -18,6 +18,17 @@ fn gaussian_random(rng: &mut ThreadRng) -> f32 {
     }
     sum - 6.0
 }
+fn specular_reflection(ray: &mut Ray, closest_hit: &Hit) -> [f32; 3] {
+    let dot = ray.direction[0] * closest_hit.normal[0] +
+              ray.direction[1] * closest_hit.normal[1] +
+              ray.direction[2] * closest_hit.normal[2];
+    [
+        ray.direction[0] - 2.0 * dot * closest_hit.normal[0],
+        ray.direction[1] - 2.0 * dot * closest_hit.normal[1],
+        ray.direction[2] - 2.0 * dot * closest_hit.normal[2],
+    ]
+}
+
 impl Scene {
     pub fn new(scene_name: String) -> Scene {
         let mut scene = Scene {
@@ -39,7 +50,8 @@ impl Scene {
                 sphere["color"][2].as_f64().unwrap() as f32,
             ];
             let light = sphere["light"].as_f64().unwrap() as f32;
-            scene.spheres.push(Sphere::new(center, radius, color, light));
+            let smoothness = sphere["smoothness"].as_f64().unwrap() as f32;
+            scene.spheres.push(Sphere::new(center, radius, color, light, smoothness));
         }
         for obj in data["objects"].as_array().unwrap() {
             let filename = obj["filename"].as_str().unwrap();
@@ -59,7 +71,8 @@ impl Scene {
                 obj["scale"][1].as_f64().unwrap() as f32,
                 obj["scale"][2].as_f64().unwrap() as f32,
             ];
-            let triangles = objmanager::extract_triangles(filename, translation, scale, light, color);
+            let smoothness = obj["smoothness"].as_f64().unwrap() as f32;
+            let triangles = objmanager::extract_triangles(filename, translation, scale, light, color, smoothness);
             for triangle in triangles {
                 scene.triangles.push(triangle);
             }
@@ -119,7 +132,7 @@ impl Scene {
             let mut accumulated_light = [0.0, 0.0, 0.0];
 
             for _ in 0..bounces {
-                let mut closest_hit = Hit::new(f32::INFINITY, [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], 0.0);
+                let mut closest_hit = Hit::new(f32::INFINITY, [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], 0.0, 0.0);
                 for sphere in &self.spheres {
                     //println!("speher");
                     let hit = sphere.intersection(&ray);
@@ -168,13 +181,22 @@ impl Scene {
                 let y = gaussian_random(&mut rng);
                 let z = gaussian_random(&mut rng);
                 let length = (x.powi(2) + y.powi(2) + z.powi(2)).sqrt();
-                ray.direction[0] = x / length;
-                ray.direction[1] = y / length;
-                ray.direction[2] = z / length;
-                if ray.direction[0] * closest_hit.normal[0] + ray.direction[1] * closest_hit.normal[1] + ray.direction[2] * closest_hit.normal[2] < 0.0 {
-                    ray.direction[0] = -ray.direction[0];
-                    ray.direction[1] = -ray.direction[1];
-                    ray.direction[2] = -ray.direction[2];
+                let mut new_ray_direction = [x / length, y / length, z / length];
+                if new_ray_direction[0] * closest_hit.normal[0] + new_ray_direction[1] * closest_hit.normal[1] + new_ray_direction[2] * closest_hit.normal[2] < 0.0 {
+                    new_ray_direction[0] = -new_ray_direction[0];
+                    new_ray_direction[1] = -new_ray_direction[1];
+                    new_ray_direction[2] = -new_ray_direction[2];
+                }
+                if closest_hit.smoothness > 0.0 {
+                    let specular_direction = specular_reflection(&mut ray, &closest_hit);
+                    ray.direction = [
+                        new_ray_direction[0] * (1.0 - closest_hit.smoothness) + specular_direction[0] * closest_hit.smoothness,
+                        new_ray_direction[1] * (1.0 - closest_hit.smoothness) + specular_direction[1] * closest_hit.smoothness,
+                        new_ray_direction[2] * (1.0 - closest_hit.smoothness) + specular_direction[2] * closest_hit.smoothness,
+                    ];
+                }
+                else {
+                    ray.direction = new_ray_direction;
                 }
             }
             colour_sum[0] += accumulated_light[0];

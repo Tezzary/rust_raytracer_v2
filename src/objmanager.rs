@@ -2,7 +2,7 @@ use std::fs::File;
 use std::io::{BufRead, BufReader};
 use super::objects;
 //read from .obj file
-pub fn extract_triangles(filename: &str, translation: [f32; 3], scale: [f32; 3], light: f32, color: [f32; 3]) -> Vec<objects::Triangle> {
+pub fn extract_triangles(filename: &str, translation: [f32; 3], scale: [f32; 3], light: f32, color: [f32; 3], smoothness: f32) -> Vec<objects::Triangle> {
     let mut triangles = vec![];
     let mut vertices = vec![];
 
@@ -47,7 +47,7 @@ pub fn extract_triangles(filename: &str, translation: [f32; 3], scale: [f32; 3],
                     let index: usize = words.next().unwrap().split("/").collect::<Vec<&str>>()[0].parse().unwrap();
                     face[i] = vertices[index - 1];
                 }
-                triangles.push(objects::Triangle::new(face, color, light));
+                triangles.push(objects::Triangle::new(face, color, light, smoothness));
             }
             _ => {}
         }

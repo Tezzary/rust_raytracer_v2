@@ -15,11 +15,11 @@ const LOGGING: bool = false;
 
 const WIDTH: usize = 800;
 const HEIGHT: usize = 600;
-const FOV: f32 = 90.0 * f32::consts::PI / 180.0; // 90 degrees
-const SAMPLES_PER_PIXEL: usize = 1000;
-const MAX_BOUNCES: usize = 3;
+const FOV: f32 = 100.0 * f32::consts::PI / 180.0; // 90 degrees
+const SAMPLES_PER_PIXEL: usize = 200;
+const MAX_BOUNCES: usize = 20;
 const ANTI_ALIASING: bool = true;
-const SCENE_FILE: &str = "scenes/objs_scene.json";
+const SCENE_FILE: &str = "scenes/heart_scene.json";
 
 const THREAD_COUNT: usize = 24;
 const THREAD_CHUNK_SIZE: usize = 20;

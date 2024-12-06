@@ -8,21 +8,24 @@
             "position": [0, 0, -48],
             "scale": [2, 1.6, 3],
             "color": [1, 1, 1],
-            "light": 0
+            "light": 0,
+            "smoothness": 0
         },
         {
             "filename": "objs/cube.obj",
             "position": [0, 1.5, -46.3],
             "scale": [1, 0.1, 0.7],
             "color": [1, 1, 1],
-            "light": 2
+            "light": 5,
+            "smoothness": 0
         },
         {
             "filename": "objs/heart.obj",
             "position": [0, -0.45, -46],
-            "scale": [0.5, 0.5, 0.5],
+            "scale": [0.45, 0.45, 0.45],
             "color": [1, 0, 0],
-            "light": 0
+            "light": 0,
+            "smoothness": 0
         }
     ]
 }

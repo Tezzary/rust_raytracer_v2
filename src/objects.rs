@@ -5,16 +5,18 @@ pub struct Hit {
     pub normal: [f32; 3],
     pub color: [f32; 3],
     pub light: f32,
+    pub smoothness: f32,
 }
 
 impl Hit {
-    pub fn new(t: f32, location: [f32; 3], normal: [f32; 3], color: [f32; 3], light: f32) -> Hit {
+    pub fn new(t: f32, location: [f32; 3], normal: [f32; 3], color: [f32; 3], light: f32, smoothness: f32) -> Hit {
         Hit {
             t: t,
             location: location,
             normal: normal,
             color: color,
             light: light,
+            smoothness: smoothness,
         }
     }
 
@@ -26,14 +28,16 @@ pub struct Sphere {
     pub radius: f32,
     pub color: [f32; 3],
     pub light: f32,
+    pub smoothness: f32,
 }
 impl Sphere {
-    pub fn new(center: [f32; 3], radius: f32, color: [f32; 3], light: f32) -> Sphere {
+    pub fn new(center: [f32; 3], radius: f32, color: [f32; 3], light: f32, smoothness: f32) -> Sphere {
         Sphere {
             center,
             radius,
             color,
             light,
+            smoothness,
         }
     }
     pub fn intersection(&self, ray: &Ray) -> Hit {
@@ -46,11 +50,11 @@ impl Sphere {
                 (ray.origin[2] - self.center[2]).powi(2) - self.radius.powi(2);
         let discriminant = b.powi(2) - 4.0 * a * c;
         if discriminant < 0.0 {
-            return Hit::new(-1.0, [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], 0.0);
+            return Hit::new(-1.0, [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], 0.0, 0.0);
         }
         let t = (-b - discriminant.sqrt()) / (2.0 * a);
         if t < 0.00001 {
-            return Hit::new(-1.0, [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], 0.0);
+            return Hit::new(-1.0, [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], 0.0, 0.0);
         }
         let mut location = [ray.origin[0] + ray.direction[0] * t,
                         ray.origin[1] + ray.direction[1] * t,
@@ -64,17 +68,10 @@ impl Sphere {
                         (location[1] - self.center[1]) / self.radius,
                         (location[2] - self.center[2]) / self.radius];
         
-        Hit::new(t, location, normal, self.color, self.light)
+        Hit::new(t, location, normal, self.color, self.light, self.smoothness)
     }
 }
 
-#[derive(Clone)]
-pub struct Triangle {
-    pub vertices: [[f32; 3]; 3],
-    pub normal: [f32; 3],
-    pub color: [f32; 3],
-    pub light: f32,
-}
 fn cross_product(a: [f32; 3], b: [f32; 3]) -> [f32; 3] {
     [a[1] * b[2] - a[2] * b[1],
      a[2] * b[0] - a[0] * b[2],
@@ -89,8 +86,18 @@ fn add(a: [f32; 3], b: [f32; 3]) -> [f32; 3] {
 fn subtract(a: [f32; 3], b: [f32; 3]) -> [f32; 3] {
     [a[0] - b[0], a[1] - b[1], a[2] - b[2]]
 }
+#[derive(Clone)]
+
+pub struct Triangle {
+    pub vertices: [[f32; 3]; 3],
+    pub normal: [f32; 3],
+    pub color: [f32; 3],
+    pub light: f32,
+    pub smoothness: f32,
+}
+
 impl Triangle {
-    pub fn new(vertices: [[f32; 3]; 3], color: [f32; 3], light: f32) -> Triangle {
+    pub fn new(vertices: [[f32; 3]; 3], color: [f32; 3], light: f32, smoothness: f32) -> Triangle {
         let normal = [(vertices[1][1] - vertices[0][1]) * (vertices[2][2] - vertices[0][2]) - (vertices[1][2] - vertices[0][2]) * (vertices[2][1] - vertices[0][1]),
                         (vertices[1][2] - vertices[0][2]) * (vertices[2][0] - vertices[0][0]) - (vertices[1][0] - vertices[0][0]) * (vertices[2][2] - vertices[0][2]),
                         (vertices[1][0] - vertices[0][0]) * (vertices[2][1] - vertices[0][1]) - (vertices[1][1] - vertices[0][1]) * (vertices[2][0] - vertices[0][0])];
@@ -101,6 +108,7 @@ impl Triangle {
             normal,
             color,
             light,
+            smoothness,
         }
     }
     pub fn intersection(&self, ray: &Ray) -> Hit {
@@ -117,13 +125,13 @@ impl Triangle {
         let normal_dot_dir = dot_product(self.normal, ray.direction);
 
         if normal_dot_dir.abs() < 0.00001 { //parrallel check
-            return Hit::new(-1.0, [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], 0.0);
+            return Hit::new(-1.0, [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], 0.0, 0.0);
         }
 
         let normal_dot_origin = dot_product(self.normal, ray.origin);
         let t = -(normal_dot_origin + d) / normal_dot_dir;
         if t < 0.00001 {
-            return Hit::new(-1.0, [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], 0.0);
+            return Hit::new(-1.0, [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], 0.0, 0.0);
         }
         let p = [ray.origin[0] + ray.direction[0] * t,
                  ray.origin[1] + ray.direction[1] * t,
@@ -134,11 +142,11 @@ impl Triangle {
 
         if pa >= 0.0 && pb >= 0.0 && pc >= 0.0 {
             if dot_product(ray.direction, self.normal) > 0.0 {
-                return Hit::new(t, p, [-self.normal[0], -self.normal[1], -self.normal[2]], self.color, self.light);
+                return Hit::new(t, p, [-self.normal[0], -self.normal[1], -self.normal[2]], self.color, self.light, self.smoothness);
             }
-            return Hit::new(t, p, self.normal, self.color, self.light);
+            return Hit::new(t, p, self.normal, self.color, self.light, self.smoothness);
         }
-        Hit::new(-1.0, [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], 0.0)
+        Hit::new(-1.0, [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], 0.0, 0.0)
     }
 }
 
