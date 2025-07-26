@@ -52,11 +52,12 @@ pub fn extract_triangles(filename: &str, translation: [f32; 3], scale: [f32; 3],
             _ => {}
         }
     }
+    
     let mid_point = [(minmaxx[0] + minmaxx[1]) / 2.0, (minmaxy[0] + minmaxy[1]) / 2.0, (minmaxz[0] + minmaxz[1]) / 2.0];
     for triangle in &mut triangles {
         for i in 0..3 {
             for j in 0..3 {
-                triangle.vertices[i][j] = (triangle.vertices[i][j] - mid_point[j]) * scale[j] + translation[j];
+                triangle.vertices[i][j] = (triangle.vertices[i][j]/*- mid_point[j]*/) * scale[j] + translation[j];
             }
         }
     }

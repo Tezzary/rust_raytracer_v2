@@ -105,7 +105,7 @@ impl Scene {
         let dir_y = -y_angle.sin();
         
         let length = (dir_x.powi(2) + dir_y.powi(2) + 1.0).sqrt();
-        let mut ray = Ray::new([0.0, 0.0, -50.0], [dir_x / length, dir_y / length, 1.0 / length]);
+        let mut ray = Ray::new([0.0, 0.0, 0.0], [dir_x / length, dir_y / length, 1.0 / length]);
 
         let mut colour_sum = [0.0, 0.0, 0.0];
         let initial_origin = [ray.origin[0], ray.origin[1], ray.origin[2]];
@@ -158,9 +158,9 @@ impl Scene {
                 ray.color[1] *= closest_hit.color[1] as f32;
                 ray.color[2] *= closest_hit.color[2] as f32;
 
-                if closest_hit.light > 0.0 {
-                    break;
-                }
+                // if closest_hit.light > 0.0 {
+                //     break;
+                // }
 
                 ray.origin = closest_hit.location;
                 
