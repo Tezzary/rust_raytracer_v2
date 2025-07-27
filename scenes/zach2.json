@@ -1,0 +1,47 @@
+{
+    "spheres": [
+
+    ],
+    "objects": [
+        {
+            "filename": "objs/cube.obj",
+            "position": [0, -1.6, 0],
+            "scale": [1000, 1.0, 1000],
+            "color": [1, 1, 1],
+            "light": 0,
+            "smoothness": 0.4
+        },
+        {
+            "filename": "objs/Z.obj",
+            "position": [-1.65, -0.5, 2.65],
+            "scale": [2, 2, 2],
+            "color": [0.65, 0.65, 0.3],
+            "light": 1,
+            "smoothness": 0
+        },
+        {
+            "filename": "objs/A.obj",
+            "position": [-1.65, -0.5, 2.65],
+            "scale": [2, 2, 2],
+            "color": [0.8, 0.4, 0.4],
+            "light": 1,
+            "smoothness": 0
+        },
+        {
+            "filename": "objs/C.obj",
+            "position": [-1.65, -0.5, 2.65],
+            "scale": [2, 2, 2],
+            "color": [0.4, 0.6, 0.8],
+            "light": 1,
+            "smoothness": 0
+        },
+        {
+            "filename": "objs/H.obj",
+            "position": [-1.65, -0.5, 2.65],
+            "scale": [2, 2, 2],
+            "color": [0.4, 0.8, 0.6],
+            "light": 1,
+            "smoothness": 0
+        }
+    ]
+}

@@ -13,15 +13,15 @@ mod objmanager;
 
 const LOGGING: bool = false;
 
-const WIDTH: usize = 500;
-const HEIGHT: usize = 300;
+const WIDTH: usize = 1920;
+const HEIGHT: usize = 1080;
 const FOV: f32 = 90.0 * f32::consts::PI / 180.0; // 100 degrees
-const SAMPLES_PER_PIXEL: usize = 100;
+const SAMPLES_PER_PIXEL: usize = 4096;
 const MAX_BOUNCES: usize = 5;
 const ANTI_ALIASING: bool = true;
-const SCENE_FILE: &str = "scenes/zach.json";
+const SCENE_FILE: &str = "scenes/zach2.json";
 
-const THREAD_COUNT: usize = 24;
+const THREAD_COUNT: usize = 18;
 const THREAD_CHUNK_SIZE: usize = 20;
 
 fn status_print(saved_chunks: usize, total_chunks: usize, elapsed_time: u64) {
